@@ -6,27 +6,23 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:we_chat/controller/chat_controller.dart';
-import 'package:we_chat/controller/home_controller.dart';
-import 'package:we_chat/controller/login_controller.dart';
-import 'package:we_chat/model/chat_user.dart';
+import 'package:we_chat/controller/home_page_controller.dart';
+import 'package:we_chat/controller/profile_controller.dart';
+
 import '../../core/const/colors.dart';
 import '../../main.dart';
+import '../models/chat_user.dart';
 import '../widgets/custom_text.dart';
 import '../widgets/custom_text_form.dart';
 
 class ProfileScreen extends StatelessWidget {
   ChatUser user;
-  TextEditingController ?textEditingController;
-  ProfileScreen({super.key,required this.user});
-
-  LoginController controller = Get.put(LoginController());
-
-  HomeController controller2 = Get.put(HomeController());
-  ChatController controller3 = Get.put(ChatController());
+  TextEditingController? textEditingController;
+  ProfileScreen({super.key, required this.user});
+  ProfileController controller = Get.put(ProfileController());
+  HomeScreenController controller2 = Get.find();
   @override
   Widget build(BuildContext context) {
-    final formkey = GlobalKey<FormState>();
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -56,18 +52,18 @@ class ProfileScreen extends StatelessWidget {
           child: ListView(
             children: [
               Form(
-                key: formkey,
+                key: controller.formState,
                 child: Column(
                   children: [
                     Stack(
                       children: [
                         Obx(
-                          () => controller2.selectedImage.value != null
+                          () => controller.selectedImage.value != null
                               ? ClipRRect(
                                   borderRadius:
                                       BorderRadius.circular(mq.height * .1),
                                   child: Image.file(
-                                    controller2.selectedImage.value!,
+                                    controller.selectedImage.value!,
                                     width: mq.height * .2,
                                     height: mq.height * .2,
                                     fit: BoxFit.cover,
@@ -124,9 +120,9 @@ class ProfileScreen extends StatelessWidget {
                                                   imageQuality: 80);
                                           if (pickedFile != null) {
                                             final image = File(pickedFile.path);
-                                            controller2.selectImage(image);
-                                            controller2.updateProfilePicture(
-                                                File(controller2.selectedImage
+                                            controller.selectImage(image);
+                                            controller.updateProfilePicture(
+                                                File(controller.selectedImage
                                                     .value!.path));
                                           }
                                         },
@@ -148,9 +144,9 @@ class ProfileScreen extends StatelessWidget {
                                                   imageQuality: 80);
                                           if (pickedFile != null) {
                                             final image = File(pickedFile.path);
-                                            controller2.selectImage(image);
-                                            controller2.updateProfilePicture(
-                                                File(controller2.selectedImage
+                                            controller.selectImage(image);
+                                            controller.updateProfilePicture(
+                                                File(controller.selectedImage
                                                     .value!.path));
                                           }
                                         },
@@ -190,8 +186,8 @@ class ProfileScreen extends StatelessWidget {
                       height: mq.height * .05,
                     ),
                     CustomTextForm(
-                      mycontroller: textEditingController,
-                      onSaved: (val) => controller2.me!.name = val ?? '',
+                      mycontroller: controller.name,
+                      onSaved: (val) => controller2.me.name = val ?? '',
                       validator: (val) => val != null && val.isNotEmpty
                           ? null
                           : 'Field required',
@@ -203,8 +199,8 @@ class ProfileScreen extends StatelessWidget {
                       height: mq.height * .02,
                     ),
                     CustomTextForm(
-                      mycontroller: textEditingController,
-                      onSaved: (val) => controller2.me!.about = val ?? '',
+                      mycontroller: controller.about,
+                      onSaved: (val) => controller2.me.about = val ?? '',
                       validator: (val) => val != null && val.isNotEmpty
                           ? null
                           : 'Field required',
@@ -220,8 +216,7 @@ class ProfileScreen extends StatelessWidget {
                       children: [
                         InkWell(
                           onTap: () {
-                            controller2.udateUserInfo().then(
-                                (value) => Get.snackbar('title', ' message'));
+                            controller.updateUserInfo();
                           },
                           child: CircleAvatar(
                               maxRadius: 25,
@@ -252,7 +247,7 @@ class ProfileScreen extends StatelessWidget {
                                     ),
                                     TextButton(
                                       onPressed: () async {
-                                        await controller3
+                                        await controller2
                                             .updateActiveStatus(false);
                                         controller.signOut();
                                         Get.back();

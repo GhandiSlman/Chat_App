@@ -1,24 +1,26 @@
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:get/get.dart';
-import 'package:we_chat/controller/chat_controller.dart';
+
+import 'package:we_chat/controller/home_page_controller.dart';
 import 'package:we_chat/core/const/colors.dart';
 import 'package:we_chat/core/helper/my_date_utile.dart';
-import 'package:we_chat/main.dart';
-import 'package:we_chat/model/chat_user.dart';
-import 'package:we_chat/view/screens/chat_screen.dart';
-import 'package:we_chat/view/screens/view_profile_screen.dart';
+import 'package:we_chat/main.dart'; 
 
-import '../../model/message.dart';
+import '../models/chat_user.dart';
+import '../models/message.dart';
+import '../screens/chat_screen.dart';
+import '../screens/view_profile_screen.dart';
 import 'custom_text.dart';
 
 class ChatUserCard extends StatelessWidget {
   final ChatUser user;
   ChatUserCard({super.key, required this.user});
-  ChatController controller = Get.put(ChatController());
+  HomeScreenController controller = Get.find();
   Message? message;
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,7 @@ class ChatUserCard extends StatelessWidget {
           ));
         },
         child: StreamBuilder(
-          stream: controller.getLastMeassages(user),
+          stream: controller.getLastMessage(user),
           builder: (context, snapshot) {
             final data = snapshot.data?.docs;
 
@@ -185,8 +187,8 @@ class ChatUserCard extends StatelessWidget {
                   ),
                 ),
                 title: CustomText(text: '${user.name}'),
-                subtitle: message != null
-                    ? message!.msg!.startsWith('http')
+                       subtitle: message != null
+                    ?  message!.type == Type.image
                         ? Row(
                             children: [
                               Icon(
@@ -207,8 +209,8 @@ class ChatUserCard extends StatelessWidget {
                       ),
                 trailing: message == null
                     ? null
-                    : message!.read!.isEmpty &&
-                            message!.fromId != controller.user.uid
+                    : message!.read.isEmpty &&
+                            message!.fromId != HomeScreenController.user.uid
                         ? Icon(
                             Icons.mark_email_unread_outlined,
                             size: 15,
@@ -216,7 +218,7 @@ class ChatUserCard extends StatelessWidget {
                           )
                         : CustomText(
                             text:
-                                '${MyDateUtil.getMessageTime(context: context, time: message!.sent!)}',
+                                '${MyDateUtil.getMessageTime(context: context, time: message!.sent)}',
                             color: AppColors.black54,
                           ));
           },

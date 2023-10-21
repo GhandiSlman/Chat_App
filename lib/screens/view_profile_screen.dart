@@ -7,12 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:we_chat/controller/chat_controller.dart';
-import 'package:we_chat/controller/home_controller.dart';
-import 'package:we_chat/controller/login_controller.dart';
-import 'package:we_chat/model/chat_user.dart';
+
+import 'package:we_chat/controller/home_page_controller.dart';
+import 'package:we_chat/controller/profile_controller.dart';
+
 import '../../core/const/colors.dart';
 import '../../core/helper/my_date_utile.dart';
 import '../../main.dart';
+import '../models/chat_user.dart';
 import '../widgets/custom_text.dart';
 import '../widgets/custom_text_form.dart';
 
@@ -21,17 +23,16 @@ class ViewProfileScreen extends StatelessWidget {
 
   ViewProfileScreen({super.key, required this.user});
 
-  LoginController controller = Get.put(LoginController());
+  ProfileController controller = Get.put(ProfileController());
 
-  HomeController controller2 = Get.put(HomeController());
-  ChatController controller3 = Get.put(ChatController());
+  HomeScreenController controller2 =  Get.find();
+
   @override
   Widget build(BuildContext context) {
     final formkey = GlobalKey<FormState>();
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-   
         body: Padding(
           padding: EdgeInsets.symmetric(
               horizontal: mq.height * .05, vertical: mq.width * .05),
@@ -42,12 +43,12 @@ class ViewProfileScreen extends StatelessWidget {
                   Stack(
                     children: [
                       Obx(
-                        () => controller2.selectedImage.value != null
+                        () => controller.selectedImage.value != null
                             ? ClipRRect(
                                 borderRadius:
                                     BorderRadius.circular(mq.height * .1),
                                 child: Image.file(
-                                  controller2.selectedImage.value!,
+                                  controller.selectedImage.value!,
                                   width: mq.height * .2,
                                   height: mq.height * .2,
                                   fit: BoxFit.cover,
@@ -90,7 +91,7 @@ class ViewProfileScreen extends StatelessWidget {
                     height: mq.height * .02,
                   ),
                   StreamBuilder(
-                      stream: controller3.getUserInfo(user),
+                      stream: controller2.getUserInfo(user),
                       builder: (context, snapshot) {
                         final data = snapshot.data?.docs;
                         final list = data
@@ -139,13 +140,10 @@ class ViewProfileScreen extends StatelessWidget {
                   SizedBox(
                     height: mq.height * .3,
                   ),
-                 
-                     
-                      CustomText(
-                        text:
-                            'Joined at: ${MyDateUtil.getLastMessageTime(context: context, time: user.createdAt,showYear: true)}',
-                      )
-                    
+                  CustomText(
+                    text:
+                        'Joined at: ${MyDateUtil.getLastMessageTime(context: context, time: user.createdAt, showYear: true)}',
+                  )
                 ],
               ),
             ],

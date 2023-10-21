@@ -9,20 +9,23 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:we_chat/controller/chat_controller.dart';
+import 'package:we_chat/controller/home_page_controller.dart';
 import 'package:we_chat/core/const/colors.dart';
 import 'package:we_chat/core/helper/my_date_utile.dart';
 import 'package:we_chat/main.dart';
-import 'package:we_chat/model/chat_user.dart';
-import 'package:we_chat/model/message.dart';
-import 'package:we_chat/view/screens/view_profile_screen.dart';
-import 'package:we_chat/view/widgets/custom_text.dart';
-import 'package:we_chat/view/widgets/message_card.dart';
+import 'package:we_chat/models/message.dart';
+import 'package:we_chat/screens/view_profile_screen.dart';
+
+import '../models/chat_user.dart';
+import '../widgets/custom_text.dart';
+import '../widgets/message_card.dart';
 
 class ChatScreen extends StatelessWidget {
   ChatUser user;
   ChatScreen({super.key, required this.user});
   final textController = TextEditingController();
   ChatController controller = Get.put(ChatController());
+  HomeScreenController controller2 = Get.find();
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -36,12 +39,12 @@ class ChatScreen extends StatelessWidget {
           children: [
             Expanded(
               child: StreamBuilder(
-                stream: controller.getAllMeassages(user),
+                stream: controller.getAllMessages(user),
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
                     case ConnectionState.none:
-                    return SizedBox();
+                      return SizedBox();
                     case ConnectionState.active:
                     case ConnectionState.done:
                       final data = snapshot.data?.docs;
@@ -85,7 +88,6 @@ class ChatScreen extends StatelessWidget {
                       ),
                     ))
                 : Padding(padding: EdgeInsets.all(0))),
-
             Padding(
               padding: EdgeInsets.all(mq.height * .01),
               child: Row(
@@ -164,7 +166,7 @@ class ChatScreen extends StatelessWidget {
                   InkWell(
                     onTap: () {
                       if (textController.text.isNotEmpty) {
-                        controller.sendMessage(user, textController.text);
+                        controller.sendMessage(user, textController.text,Type.text);
                         textController.text = '';
                       }
                     },
@@ -195,7 +197,7 @@ class ChatScreen extends StatelessWidget {
       child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: StreamBuilder(
-            stream: controller.getUserInfo(user),
+            stream: controller2.getUserInfo(user),
             builder: (context, snapshot) {
               final data = snapshot.data?.docs;
               final list =

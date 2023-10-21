@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:we_chat/controller/login_controller.dart';
 import 'package:we_chat/core/const/colors.dart';
-import 'package:we_chat/view/widgets/custom_text.dart';
+
 
 import '../../../main.dart';
+import '../../widgets/custom_text.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
-  LoginController controller = Get.put(LoginController());
+  LoginController controller = Get.put(LoginController(),);
 
   Widget build(BuildContext context) {
     mq = MediaQuery.of(context).size;

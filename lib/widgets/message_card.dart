@@ -1,23 +1,22 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+
 import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+
 
 import 'package:get/get.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:image_picker/image_picker.dart';
+
 import 'package:we_chat/controller/chat_controller.dart';
+
+import 'package:we_chat/controller/home_page_controller.dart';
 import 'package:we_chat/core/const/colors.dart';
 import 'package:we_chat/core/helper/my_date_utile.dart';
-import 'package:we_chat/model/message.dart';
-import 'package:we_chat/view/widgets/custom_text.dart';
-import 'package:we_chat/view/widgets/custom_text_form.dart';
-import 'package:http/http.dart' as http;
+
 
 import '../../main.dart';
+import '../models/message.dart';
+import 'custom_text.dart';
 
 class MessageCard extends StatefulWidget {
   final Message message;
@@ -29,10 +28,11 @@ class MessageCard extends StatefulWidget {
 
 class _MessageCardState extends State<MessageCard> {
   ChatController controller = Get.put(ChatController());
+  HomeScreenController controller2 = Get.find();
 
   @override
   Widget build(BuildContext context) {
-    bool isMe = controller.user.uid == widget.message.fromId;
+    bool isMe = HomeScreenController.user.uid == widget.message.fromId;
     return InkWell(
       onLongPress: () {
         showBottomSheett(isMe);
@@ -50,7 +50,7 @@ class _MessageCardState extends State<MessageCard> {
           padding: EdgeInsets.only(left: mq.width * .04),
           child: Row(
             children: [
-              widget.message.read!.isNotEmpty
+              widget.message.read.isNotEmpty
                   ? Icon(
                       Icons.done_all_rounded,
                       color: AppColors.green,
@@ -66,7 +66,7 @@ class _MessageCardState extends State<MessageCard> {
               ),
               CustomText(
                 text: MyDateUtil.getFormattedTime(
-                    context: context, time: widget.message.sent!),
+                    context: context, time: widget.message.sent),
                 color: Colors.black54,
                 size: 13,
               ),
@@ -76,7 +76,7 @@ class _MessageCardState extends State<MessageCard> {
         Flexible(
           child: Container(
               padding: EdgeInsets.all(
-                widget.message.msg!.startsWith('http')
+                widget.message.type == Type.image
                     ? mq.width * .01
                     : mq.width * .04,
               ),
@@ -84,7 +84,7 @@ class _MessageCardState extends State<MessageCard> {
                   horizontal: mq.width * .04, vertical: mq.height * .01),
               decoration: BoxDecoration(
                   color: Colors.teal.shade200,
-                  borderRadius: widget.message.msg!.startsWith('http')
+                  borderRadius: widget.message.type == Type.image
                       ? BorderRadius.only(
                           topLeft: Radius.circular(mq.height * .04),
                           topRight: Radius.circular(mq.height * .04),
@@ -95,11 +95,11 @@ class _MessageCardState extends State<MessageCard> {
                           topRight: Radius.circular(mq.height * .04),
                           bottomLeft: Radius.circular(mq.height * .04),
                         )),
-              child: widget.message.msg!.startsWith('http')
+              child: widget.message.type == Type.image
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(mq.height * .04),
                       child: CachedNetworkImage(
-                          imageUrl: widget.message.msg!,
+                          imageUrl: widget.message.msg,
                           placeholder: (context, url) =>
                               CircularProgressIndicator(
                                 color: AppColors.teal,
@@ -121,7 +121,7 @@ class _MessageCardState extends State<MessageCard> {
 
   //sender message
   Widget orangeMessage() {
-    if (widget.message.read!.isEmpty) {
+    if (widget.message.read.isEmpty) {
       controller.updateMessageReadStatus(widget.message);
     }
 
@@ -131,7 +131,7 @@ class _MessageCardState extends State<MessageCard> {
         Flexible(
             child: Container(
                 padding: EdgeInsets.all(
-                  widget.message.msg!.startsWith('http')
+                  widget.message.type == Type.image
                       ? mq.width * .01
                       : mq.width * .04,
                 ),
@@ -139,7 +139,7 @@ class _MessageCardState extends State<MessageCard> {
                     horizontal: mq.width * .04, vertical: mq.height * .01),
                 decoration: BoxDecoration(
                     color: Color.fromARGB(255, 249, 230, 196),
-                    borderRadius: widget.message.msg!.startsWith('http')
+                    borderRadius: widget.message.type == Type.image
                         ? BorderRadius.only(
                             topLeft: Radius.circular(mq.height * .04),
                             topRight: Radius.circular(mq.height * .04),
@@ -149,11 +149,11 @@ class _MessageCardState extends State<MessageCard> {
                             topLeft: Radius.circular(mq.height * .04),
                             topRight: Radius.circular(mq.height * .04),
                             bottomRight: Radius.circular(mq.height * .04))),
-                child: widget.message.msg!.startsWith('http')
+                child: widget.message.type == Type.image
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(mq.height * .04),
                         child: CachedNetworkImage(
-                            imageUrl: widget.message.msg!,
+                            imageUrl: widget.message.msg,
                             placeholder: (context, url) =>
                                 CircularProgressIndicator(
                                   color: AppColors.teal,
@@ -172,7 +172,7 @@ class _MessageCardState extends State<MessageCard> {
           padding: EdgeInsets.only(right: mq.width * .04),
           child: CustomText(
             text: MyDateUtil.getFormattedTime(
-                context: context, time: widget.message.sent!),
+                context: context, time: widget.message.sent),
             color: Colors.black54,
             size: 13,
           ),
@@ -183,13 +183,13 @@ class _MessageCardState extends State<MessageCard> {
 
   void showBottomSheett(bool isMe) {
     Get.bottomSheet(Container(
-    height: isMe
-    ? (widget.message.msg!.startsWith('http')
-        ?mq.height * .3
-        :mq.height * .47)
-    : (widget.message.msg!.startsWith('http')
-        ?mq.height * .2
-        :mq.height * .28),
+      height: isMe
+          ? (widget.message.type == Type.image
+              ? mq.height * .3
+              : mq.height * .47)
+          : (widget.message.type == Type.image
+              ? mq.height * .2
+              : mq.height * .28),
       width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -210,15 +210,15 @@ class _MessageCardState extends State<MessageCard> {
                 borderRadius: BorderRadius.circular(30),
                 color: AppColors.black54),
           ),
-          widget.message.msg!.startsWith('http')
+          widget.message.type == Type.image
               ? SizedBox()
-              :
-               InkWell(
+              : InkWell(
                   onTap: () {
                     Clipboard.setData(ClipboardData(text: widget.message.msg))
                         .then((value) {
                       Get.back();
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        backgroundColor: AppColors.green,
                         content: CustomText(
                           text: 'Message copied',
                         ),
@@ -236,17 +236,17 @@ class _MessageCardState extends State<MessageCard> {
                     ),
                   ),
                 ),
-             
-          if (!widget.message.msg!.startsWith('http') && isMe)
+          if (widget.message.type == Type.text && isMe)
             InkWell(
               onTap: () {
+                String updateMg = widget.message.msg;
                 Get.back();
                 Get.defaultDialog(
                     title: 'Edit Message',
                     content: TextFormField(
                       //hint: 'Edit',
-                      onChanged: (val) => widget.message.msg = val,
-                      initialValue: widget.message.msg,
+                      onChanged: (val) => updateMg = val,
+                      initialValue: updateMg,
                     ),
                     cancel: TextButton(
                         onPressed: () {
@@ -256,7 +256,7 @@ class _MessageCardState extends State<MessageCard> {
                     confirm: TextButton(
                         onPressed: () {
                           controller.updateMessage(
-                              widget.message, widget.message.msg!);
+                              widget.message, updateMg);
                           Get.back();
                         },
                         child: CustomText(text: 'Edit')));
@@ -302,7 +302,7 @@ class _MessageCardState extends State<MessageCard> {
             ),
             title: CustomText(
               text:
-                  'Sent At ${MyDateUtil.getMessageTime(context: context, time: widget.message.sent!)}',
+                  'Sent At ${MyDateUtil.getMessageTime(context: context, time: widget.message.sent)}',
               color: AppColors.black54,
             ),
           ),
@@ -312,8 +312,8 @@ class _MessageCardState extends State<MessageCard> {
               color: AppColors.green,
             ),
             title: CustomText(
-              text: widget.message.read!.isNotEmpty
-                  ? 'Read At ${MyDateUtil.getMessageTime(context: context, time: widget.message.read!)}'
+              text: widget.message.read.isNotEmpty
+                  ? 'Read At ${MyDateUtil.getMessageTime(context: context, time: widget.message.sent)}'
                   : 'Not seen yet',
               color: AppColors.black54,
             ),
