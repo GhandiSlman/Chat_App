@@ -17,7 +17,6 @@ import '../widgets/custom_text_form.dart';
 
 class ProfileScreen extends StatelessWidget {
   ChatUser user;
-  TextEditingController? textEditingController;
   ProfileScreen({super.key, required this.user});
   ProfileController controller = Get.put(ProfileController());
   HomeScreenController controller2 = Get.find();
