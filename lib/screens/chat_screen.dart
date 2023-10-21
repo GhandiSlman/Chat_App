@@ -23,7 +23,7 @@ import '../widgets/message_card.dart';
 class ChatScreen extends StatelessWidget {
   ChatUser user;
   ChatScreen({super.key, required this.user});
-  final textController = TextEditingController();
+  
   ChatController controller = Get.put(ChatController());
   HomeScreenController controller2 = Get.find();
   @override
@@ -111,7 +111,7 @@ class ChatScreen extends StatelessWidget {
                               ))),
                           Expanded(
                               child: TextFormField(
-                            controller: textController,
+                            controller: controller.textController,
                             keyboardType: TextInputType.multiline,
                             //maxLines: null,
                             decoration: InputDecoration(
@@ -165,9 +165,9 @@ class ChatScreen extends StatelessWidget {
                   ),
                   InkWell(
                     onTap: () {
-                      if (textController.text.isNotEmpty) {
-                        controller.sendMessage(user, textController.text,Type.text);
-                        textController.text = '';
+                      if (controller.textController.text.isNotEmpty) {
+                        controller.sendMessage(user, controller.textController.text,Type.text);
+                        controller.textController.text = '';
                       }
                     },
                     child: CircleAvatar(

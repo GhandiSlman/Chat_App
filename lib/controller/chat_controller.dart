@@ -14,7 +14,7 @@ import '../models/message.dart';
 class ChatController extends GetxController {
   HomeScreenController controller = Get.find();
   Rx<File?> selectedImage = Rx<File?>(null);
-
+  final textController = TextEditingController();
   void selectImage(File image) {
     selectedImage.value = image;
   }
