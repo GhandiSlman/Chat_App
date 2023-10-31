@@ -24,7 +24,7 @@ class ChatController extends GetxController {
   RxBool isUploading = false.obs;
   RxBool showEmoji = false.obs;
 
-   Future<void> sendChatImage(ChatUser chatUser, File file) async {
+  Future<void> sendChatImage(ChatUser chatUser, File file) async {
     //getting image file extension
     final ext = file.path.split('.').last;
 
@@ -44,17 +44,17 @@ class ChatController extends GetxController {
     await sendMessage(chatUser, imageUrl, Type.image);
   }
 
-    //update read status of message
- Future<void> updateMessageReadStatus(Message message) async {
+  //update read status of message
+  Future<void> updateMessageReadStatus(Message message) async {
     controller.firestore
-        .collection('chats/${controller.getConversationID(message.fromId)}/messages/')
+        .collection(
+            'chats/${controller.getConversationID(message.fromId)}/messages/')
         .doc(message.sent)
         .update({'read': DateTime.now().millisecondsSinceEpoch.toString()});
   }
 
   // for sending message
-   Future<void> sendMessage(
-      ChatUser chatUser, String msg, Type type) async {
+  Future<void> sendMessage(ChatUser chatUser, String msg, Type type) async {
     //message sending time (also used as id)
     final time = DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -67,22 +67,26 @@ class ChatController extends GetxController {
         fromId: HomeScreenController.user.uid,
         sent: time);
 
-    final ref = controller.firestore
-        .collection('chats/${controller.getConversationID(chatUser.id)}/messages/');
+    final ref = controller.firestore.collection(
+        'chats/${controller.getConversationID(chatUser.id)}/messages/');
     await ref.doc(time).set(message.toJson()).then((value) =>
         sendPushNotification(chatUser, type == Type.text ? msg : 'image'));
   }
-  // for update message 
-    Future<void> updateMessage(Message message, String updatedMsg) async {
+
+  // for update message
+  Future<void> updateMessage(Message message, String updatedMsg) async {
     await controller.firestore
-        .collection('chats/${controller.getConversationID(message.toId)}/messages/')
+        .collection(
+            'chats/${controller.getConversationID(message.toId)}/messages/')
         .doc(message.sent)
         .update({'msg': updatedMsg});
   }
+
   // for delete message
-   Future<void> deleteMessage(Message message) async {
+  Future<void> deleteMessage(Message message) async {
     await controller.firestore
-        .collection('chats/${controller.getConversationID(message.toId)}/messages/')
+        .collection(
+            'chats/${controller.getConversationID(message.toId)}/messages/')
         .doc(message.sent)
         .delete();
 
@@ -90,10 +94,11 @@ class ChatController extends GetxController {
       await controller.storage.refFromURL(message.msg).delete();
     }
   }
+
   // for sending push notification
-    Future<void> sendPushNotification(
-      ChatUser chatUser, String msg) async {
+  Future<void> sendPushNotification(ChatUser chatUser, String msg) async {
     try {
+      print('dnbskfnvl=============================');
       final body = {
         "to": chatUser.pushToken,
         "notification": {
@@ -119,9 +124,36 @@ class ChatController extends GetxController {
       print('\nsendPushNotificationE: $e');
     }
   }
+//   Future<void> sendPushNotification(ChatUser chatUser, String msg) async {
+//   try {
+//     print('dnbskfnvl=============================');
+//     final body = {
+//       "to": chatUser.pushToken,
+//       "notification": {
+//         "title": controller.me.name, //our name should be send
+//         "body": msg,
+//         "android_channel_id": "chats"
+//       },
+//       // "data": {
+//       //   "some_data": "User ID: ${me.id}",
+//       // },
+//     };
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
-      ChatUser user) {
+//     var res = await post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
+//         headers: {
+//           HttpHeaders.contentTypeHeader: 'application/json',
+//           HttpHeaders.authorizationHeader:
+//               'key=AAAAQ0Bf7ZA:APA91bGd5IN5v43yedFDo86WiSuyTERjmlr4tyekbw_YW6JrdLFblZcbHdgjDmogWLJ7VD65KGgVbETS0Px7LnKk8NdAz4Z-AsHRp9WoVfArA5cNpfMKcjh_MQI-z96XQk5oIDUwx8D1'
+//         },
+//         body: jsonEncode(body));
+//     print('Response status: ${res.statusCode}');
+//     print('Response body: ${res.body}');
+//   } catch (e) {
+//     print('\nsendPushNotificationE: $e');
+//   }
+// }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(ChatUser user) {
     return controller.firestore
         .collection('chats/${controller.getConversationID(user.id)}/messages/')
         .orderBy('sent', descending: true)

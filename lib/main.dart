@@ -19,7 +19,6 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  HomeScreenController controller = Get.put(HomeScreenController());
   MyApp({super.key});
   @override
   Widget build(BuildContext context) {

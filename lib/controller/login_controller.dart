@@ -15,7 +15,7 @@ class LoginController extends GetxController {
   RxBool isAnimate = false.obs;
   User get user => FirebaseAuth.instance.currentUser!;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  
+
   Future<bool> userExists() async {
     return (await firestore.collection('users').doc(user.uid).get()).exists;
   }

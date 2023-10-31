@@ -313,7 +313,7 @@ class _MessageCardState extends State<MessageCard> {
             ),
             title: CustomText(
               text: widget.message.read.isNotEmpty
-                  ? 'Read At ${MyDateUtil.getMessageTime(context: context, time: widget.message.sent)}'
+                  ? 'Read At ${MyDateUtil.getMessageTime(context: context, time: widget.message.read)}'
                   : 'Not seen yet',
               color: AppColors.black54,
             ),
